@@ -26,12 +26,13 @@ $("#bookingForm").submit(function(e) {
     $("#btnConfirm").prop("disabled", true).html("<i class='fa-solid fa-spinner fa-spin'></i> Booking...");
 
     $.ajax({
-        type: "POST",
-        url: "../includes/process.php",
+        type:        "POST",
+        url:         "../includes/process.php",
+        traditional: true,
         data: {
             book:         1,
             category:     selectedCategory,
-            coach_ids:    selectedCoaches.map(c => c.id),
+            coach_ids:    JSON.stringify(selectedCoaches.map(c => c.id)),
             book_date:    $("#bookDate").val(),
             book_time:    $("#bookTime").val(),
             session_type: $("#sessionType").val(),
@@ -49,7 +50,7 @@ $("#bookingForm").submit(function(e) {
                     html: `Your session with <b>${selectedCoaches.map(c => c.name).join(", ")}</b> has been booked.`,
                     confirmButtonColor: "#d4a853"
                 }).then(() => {
-                    window.location.href = "/RegistrationForm/index.php";
+                    window.location.href = "/REGISTRATIONSFORM/index.php";
                 });
             } else {
                 Swal.fire({ icon: "error", title: "Booking Failed", text: response, confirmButtonColor: "#d4a853" });
