@@ -36,7 +36,7 @@ try {
     <div class="page-header">
         <div class="tag">&#10022; Find a Coach</div>
         <h1>Choose Your <span>Coach</span></h1>
-        <p>Pick a category, select up to 3 coaches, then proceed to booking.</p>
+        <p>Pick a category, select up to 2 coaches, then proceed to booking.</p>
     </div>
 
     <div class="steps-bar">
@@ -84,10 +84,10 @@ try {
     <!-- STEP 2: Select Coaches -->
     <div class="panel" id="panel2">
         <div class="step2-header">
-            <p class="section-title" style="margin-bottom:0">Select up to <span>3 coaches</span></p>
+            <p class="section-title" style="margin-bottom:0">Select up to <span>2 coaches</span></p>
             <div class="selected-counter">
                 <i class="fa-solid fa-user-check"></i>
-                <span id="selectedCount">0</span><span> / 3 selected</span>
+                <span id="selectedCount">0</span><span> / 2 selected</span>
             </div>
         </div>
         <div class="coaches-grid" id="coachesGrid"></div>
