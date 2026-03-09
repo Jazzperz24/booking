@@ -1,0 +1,349 @@
+/* ==========================================================
+   FILE: admin.css
+   PAGE: Admin Panel (admin.php)
+   PATH: assets/css/admin.css
+   DESC: Styles for the full admin dashboard — fixed sidebar,
+         topbar, tab panels, stat cards, tables, forms,
+         badges, action buttons, and reports bar chart
+   ========================================================== */
+
+
+/* ============================================================
+   SECTION 1: CSS Variables (Design Tokens)
+   ============================================================ */
+:root {
+    --gold:      #d4a853;
+    --gold-light:#f0c97a;
+    --dark:      #0e0e12;
+    --surface:   #16161d;
+    --surface2:  #1e1e28;
+    --border:    rgba(212,168,83,0.18);
+    --text:      #f4f0e8;
+    --muted:     #7b7b8e;
+    --radius:    14px;
+    --sidebar-w: 240px;
+    --green:     #4ade80;
+    --red:       #f87171;
+    --yellow:    #fbbf24;
+}
+
+
+/* ============================================================
+   SECTION 2: Base / Reset
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    min-height: 100vh;
+    display: flex; /* sidebar + main side-by-side */
+}
+
+
+/* ============================================================
+   SECTION 3: Sidebar Navigation
+   — Fixed left-side panel with logo, nav items, and footer links
+   ============================================================ */
+.sidebar {
+    width: var(--sidebar-w); flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0;
+    z-index: 100;
+}
+
+/* Logo area at the top of the sidebar */
+.sidebar-logo          { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+.sidebar-logo span     { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--gold); }
+.sidebar-logo small    { display: block; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+/* Nav items container */
+.sidebar-nav           { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+
+/* Section labels inside the nav (e.g. "Dashboard", "Management") */
+.nav-section-label {
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); padding: 14px 14px 6px; opacity: .6;
+}
+
+/* Individual nav item button */
+.nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 10px;
+    cursor: pointer; transition: all .2s;
+    font-size: 13px; font-weight: 500; color: var(--muted);
+    border: 1px solid transparent;
+}
+.nav-item:hover  { background: var(--surface2); color: var(--text); }
+
+/* Currently active nav item */
+.nav-item.active {
+    background: rgba(212,168,83,0.1);
+    border-color: rgba(212,168,83,0.2);
+    color: var(--gold);
+}
+.nav-item i { width: 16px; text-align: center; }
+
+/* Bottom links: View Site + Logout */
+.sidebar-bottom        { padding: 16px 12px; border-top: 1px solid var(--border); }
+.sidebar-bottom a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 10px;
+    color: var(--muted); font-size: 13px;
+    text-decoration: none; transition: all .2s;
+}
+.sidebar-bottom a:hover { color: var(--red); background: rgba(248,113,113,0.08); }
+
+
+/* ============================================================
+   SECTION 4: Main Content Area
+   — Sits to the right of the sidebar
+   ============================================================ */
+.main {
+    margin-left: var(--sidebar-w); flex: 1;
+    display: flex; flex-direction: column;
+    min-height: 100vh;
+}
+
+
+/* ============================================================
+   SECTION 5: Top Bar
+   — Sticky header bar showing current page title and admin badge
+   ============================================================ */
+.topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+}
+.topbar-title  { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
+.topbar-right  { display: flex; align-items: center; gap: 14px; }
+
+/* Gold "Admin" badge in the topbar */
+.admin-badge {
+    background: rgba(212,168,83,0.12); border: 1px solid var(--border);
+    border-radius: 50px; padding: 5px 14px;
+    font-size: 12px; color: var(--gold); font-weight: 600;
+}
+
+/* Main content padding */
+.content { padding: 32px; flex: 1; }
+
+
+/* ============================================================
+   SECTION 6: Tab Panels
+   — Each section (Bookings, Coaches, etc.) is a hidden panel
+     that becomes visible when its nav item is clicked
+   ============================================================ */
+.tab-panel         { display: none; }
+.tab-panel.active  { display: block; animation: fadeIn .3s ease; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ============================================================
+   SECTION 7: Stat Cards
+   — 4 summary cards at the top of the Dashboard and Reports tabs
+   ============================================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 32px;
+}
+
+.stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    position: relative; overflow: hidden;
+}
+
+/* Gold top stripe */
+.stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+
+/* Icon box */
+.stat-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(212,168,83,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 14px;
+}
+
+.stat-num   { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; color: var(--gold); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+
+/* ============================================================
+   SECTION 8: Data Tables
+   — Used for Bookings, Coaches, and Clients tables
+   ============================================================ */
+
+/* Card wrapper around each table */
+.table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 28px;
+}
+
+/* Table card header row with title + search box */
+.table-header {
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+}
+.table-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+
+/* Search input inside the table header */
+.search-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 14px;
+    color: var(--text); font-family: 'Manrope', sans-serif; font-size: 13px;
+    outline: none; transition: border-color .2s; width: 220px;
+}
+.search-box:focus       { border-color: var(--gold); }
+.search-box::placeholder { color: var(--muted); }
+
+/* Table element */
+table              { width: 100%; border-collapse: collapse; }
+
+/* Table header cells */
+th {
+    text-align: left; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+}
+
+/* Table data cells */
+td {
+    padding: 13px 20px; font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+}
+tr:last-child td    { border-bottom: none; }
+tr:hover td         { background: rgba(255,255,255,0.02); }
+
+
+/* ============================================================
+   SECTION 9: Status Badges
+   — Coloured pill badges for booking status labels
+   ============================================================ */
+.badge {
+    display: inline-block; padding: 3px 10px; border-radius: 50px;
+    font-size: 11px; font-weight: 600; text-transform: capitalize;
+}
+.badge-pending   { background: rgba(251,191,36,.15);  color: var(--yellow); }  /* Yellow — awaiting confirmation */
+.badge-confirmed { background: rgba(74,222,128,.12);  color: var(--green);  }  /* Green  — confirmed */
+.badge-cancelled { background: rgba(248,113,113,.12); color: var(--red);    }  /* Red    — cancelled */
+
+
+/* ============================================================
+   SECTION 10: Table Action Buttons
+   — Small buttons inside table rows for confirm/cancel/delete
+   ============================================================ */
+.btn-sm {
+    padding: 5px 12px; border-radius: 6px; font-size: 12px;
+    font-weight: 600; cursor: pointer; border: none;
+    font-family: 'Manrope', sans-serif; transition: all .2s;
+}
+
+.btn-confirm       { background: rgba(74,222,128,.15);  color: var(--green); }   /* Confirm booking */
+.btn-confirm:hover { background: rgba(74,222,128,.25); }
+
+.btn-cancel        { background: rgba(248,113,113,.12); color: var(--red); }     /* Cancel booking */
+.btn-cancel:hover  { background: rgba(248,113,113,.22); }
+
+.btn-delete        { background: rgba(248,113,113,.12); color: var(--red); }     /* Delete record */
+.btn-delete:hover  { background: rgba(248,113,113,.22); }
+
+.btn-edit          { background: rgba(212,168,83,.12);  color: var(--gold); }    /* Edit / view all */
+.btn-edit:hover    { background: rgba(212,168,83,.22); }
+
+
+/* ============================================================
+   SECTION 11: Add Coach Form
+   — Form card for adding a new coach in the Coaches tab
+   ============================================================ */
+.form-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px; margin-bottom: 28px;
+}
+.form-card-title {
+    font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+    margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+}
+
+/* Two-column form layout */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+.form-group        { margin-bottom: 16px; }
+.form-group label  { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 7px; }
+
+/* Form inputs, selects, textareas */
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 9px;
+    color: var(--text); font-family: 'Manrope', sans-serif;
+    font-size: 13px; padding: 10px 14px;
+    outline: none; transition: border-color .2s; appearance: none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { border-color: var(--gold); }
+.form-group textarea       { min-height: 70px; resize: vertical; }
+
+/* Gold submit button inside the form */
+.btn-gold-sm {
+    padding: 10px 24px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #0e0e12; font-family: 'Manrope', sans-serif;
+    font-size: 13px; font-weight: 700; cursor: pointer; border: none;
+    transition: all .25s;
+}
+.btn-gold-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,168,83,.25); }
+
+
+/* ============================================================
+   SECTION 12: Reports — Booking Bar Chart
+   — Horizontal bar chart shown in the Reports tab
+   ============================================================ */
+.report-bar-row     { margin-bottom: 18px; }
+.report-bar-label   { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+.report-bar-label strong { color: var(--gold); }
+
+/* Bar track */
+.report-bar-track   { background: var(--surface2); border-radius: 50px; height: 8px; overflow: hidden; }
+
+/* Filled bar (width set inline via PHP) */
+.report-bar-fill    { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 50px; transition: width .5s; }
+
+
+/* ============================================================
+   SECTION 13: Mobile Responsive
+   — Sidebar collapses off-screen on smaller screens
+   ============================================================ */
+@media(max-width: 768px) {
+    /* Sidebar hidden by default on mobile */
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform .3s;
+    }
+    /* Toggled open by JS via .open class */
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    /* Main content fills full width */
+    .main    { margin-left: 0; }
+    .content { padding: 20px 16px; }
+}

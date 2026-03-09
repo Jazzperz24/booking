@@ -1,0 +1,323 @@
+/* ==========================================================
+   FILE: navbar.css
+   COMPONENT: Site-wide Navigation Bar
+   PATH: assets/css/navbar.css
+   DESC: Styles for the sticky top navbar — brand logo,
+         desktop nav links, gold Login button, user dropdown,
+         mobile hamburger menu, and scroll shadow effect.
+   INCLUDE ON: Every page, alongside stylemeow.css
+   ========================================================== */
+
+
+/* ============================================================
+   SECTION 1: CSS Variables (Design Tokens)
+   — Shared with the rest of the site
+   ============================================================ */
+:root {
+    --gold:       #d4a853;
+    --gold-light: #f0c97a;
+    --dark:       #0e0e12;
+    --surface:    #16161d;
+    --surface2:   #1e1e28;
+    --border:     rgba(212,168,83,0.18);
+    --text:       #f4f0e8;
+    --muted:      #7b7b8e;
+    --nav-height: 68px;
+}
+
+
+/* ============================================================
+   SECTION 2: Navbar Shell
+   — Fixed top bar with blur backdrop
+   ============================================================ */
+.navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+    height: var(--nav-height);
+
+    /* Glass-effect background */
+    background: rgba(14, 14, 18, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid var(--border);
+    transition: box-shadow .3s;
+}
+
+/* Shadow added by JS when user scrolls down */
+.navbar.scrolled {
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Inner flex container — brand left, links right */
+.nav-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+
+/* ============================================================
+   SECTION 3: Brand / Logo
+   — "Kaya Pa?" text logo on the left
+   ============================================================ */
+.nav-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+    flex-shrink: 0;
+    transition: opacity .2s;
+}
+
+/* The "Pa?" part is gold */
+.nav-brand span { color: var(--gold); }
+
+.nav-brand:hover { opacity: .85; }
+
+
+/* ============================================================
+   SECTION 4: Desktop Navigation Links
+   — Horizontal list of page links
+   ============================================================ */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0; padding: 0;
+}
+
+/* Individual link */
+.nav-link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    transition: color .2s, background .2s;
+    white-space: nowrap;
+}
+
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+
+/* Active page — gold colour + subtle background */
+.nav-link.active {
+    color: var(--gold);
+    background: rgba(212,168,83,0.1);
+}
+
+
+/* ============================================================
+   SECTION 5: Gold Login / Book Now Button
+   — Filled gold pill button on the far right
+   ============================================================ */
+.nav-btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 20px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #0e0e12;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    text-decoration: none;
+    transition: all .25s;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+}
+.nav-btn-gold:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212,168,83,0.28);
+}
+
+
+/* ============================================================
+   SECTION 6: Logged-in User Menu
+   — Avatar button + dropdown with Logout link
+   ============================================================ */
+.nav-user-item {
+    position: relative;
+}
+
+/* User name button */
+.nav-user-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 9px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+}
+.nav-user-btn:hover { border-color: rgba(212,168,83,0.35); color: var(--gold); }
+
+/* Chevron icon — rotates when dropdown is open */
+.nav-chevron {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform .25s;
+}
+.nav-user-item.open .nav-chevron { transform: rotate(180deg); }
+
+/* Dropdown panel */
+.nav-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 6px;
+    min-width: 160px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+
+    /* Hidden by default — toggled by JS */
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity .2s, transform .2s;
+}
+
+/* Visible state — added by JS */
+.nav-user-item.open .nav-dropdown {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+}
+
+/* Dropdown link item */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all .2s;
+}
+.dropdown-item:hover { background: var(--surface2); color: var(--text); }
+.dropdown-item i     { width: 14px; text-align: center; }
+
+
+/* ============================================================
+   SECTION 7: Mobile Hamburger Button
+   — Three-line button shown only on small screens
+   ============================================================ */
+.nav-toggle {
+    display: none;          /* hidden on desktop — shown via media query */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 38px; height: 38px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* The three lines */
+.nav-toggle span {
+    display: block;
+    width: 18px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all .3s;
+}
+
+/* Animate to X when mobile menu is open */
+.nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+
+/* ============================================================
+   SECTION 8: Mobile Menu (Slide-down panel)
+   — Nav links stack vertically on small screens
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Show the hamburger button */
+    .nav-toggle { display: flex; }
+
+    /* Collapse the nav links into a hidden panel */
+    .nav-links {
+        position: absolute;
+        top: var(--nav-height);
+        left: 0; right: 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 16px 20px;
+        gap: 4px;
+
+        /* Hidden by default */
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-height .35s ease, opacity .3s ease;
+    }
+
+    /* Open state — toggled by JS */
+    .nav-links.open {
+        max-height: 500px;
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    /* Stack links full-width */
+    .nav-link,
+    .nav-btn-gold,
+    .nav-user-btn {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 16px;
+        border-radius: 10px;
+    }
+
+    /* Dropdown inside mobile stays static (not absolute) */
+    .nav-user-item { position: static; }
+    .nav-dropdown  {
+        position: static;
+        opacity: 1; pointer-events: all;
+        transform: none; box-shadow: none;
+        border: none; padding: 0;
+        background: transparent;
+        margin-top: 4px;
+    }
+    .dropdown-item { padding-left: 32px; }
+}
+
+
+/* ============================================================
+   SECTION 9: Page Body Offset
+   — Pushes page content below the fixed navbar
+   ============================================================ */
+body {
+    padding-top: var(--nav-height);
+}
