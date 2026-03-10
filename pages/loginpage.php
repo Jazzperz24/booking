@@ -23,7 +23,6 @@ if (isset($_GET['logout'])) {
     <title>Login - Kaya Pa?</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/REGISTRATIONSFORM/assets/css/stylemeow.css">
     <link rel="stylesheet" href="/REGISTRATIONSFORM/assets/css/navbar.css">
     <link rel="stylesheet" href="/REGISTRATIONSFORM/assets/css/login.css">
 </head>
