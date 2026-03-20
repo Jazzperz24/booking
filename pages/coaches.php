@@ -60,7 +60,7 @@ try {
                 'Fitness'       => ['icon' => '🏋️', 'label' => 'Fitness'],
                 'Sports'        => ['icon' => '⚽',  'label' => 'Sports'],
                 'Wellness/Yoga' => ['icon' => '🧘',  'label' => 'Wellness / Yoga'],
-                'Belle'         => ['icon' => '✨',  'label' => 'Belle'],
+                'Belle'         => ['icon' => '✨',  'label' => 'Ballet'],
             ];
             foreach ($catMeta as $cat => $meta):
                 $count = isset($coaches[$cat]) ? count($coaches[$cat]) : 0;

@@ -54,7 +54,7 @@ require 'config/config.php';
         </div>
         <div class="cat-card">
             <span class="cat-icon">&#10024;</span>
-            <div class="cat-name">Belle</div>
+            <div class="cat-name">Ballet</div>
         </div>
     </div>
 
