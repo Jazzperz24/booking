@@ -1,9 +1,4 @@
 <?php
-// ============================================================
-// pages/aboutus.php — inside /pages/ folder
-// $base = '../'  because we need to go up one level to root
-//               to reach assets/, includes/, config/
-// ============================================================
 $page = 'about';
 $base = '../';
 require '../config/config.php';

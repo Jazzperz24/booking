@@ -1,15 +1,3 @@
-/**
- * FILE: navbar.js
- * COMPONENT: Site-wide Navigation Bar
- * PATH: assets/scripts/navbar.js
- * DESC: Handles all navbar interactions —
- *       scroll shadow effect, mobile menu toggle,
- *       and logged-in user dropdown toggle
- *
- * DEPENDS ON: Nothing (vanilla JS, no jQuery needed)
- * LOADED ON:  Every page via navbar.php
- */
-
 document.addEventListener('DOMContentLoaded', function () {
 
 

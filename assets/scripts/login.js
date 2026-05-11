@@ -1,10 +1,3 @@
-/**
- * FILE: login.js
- * PATH: assets/scripts/login.js
- * DEPENDS ON: jQuery, SweetAlert2
- * POSTS TO:   ../includes/process.php
- */
-
 $(document).ready(function () {
 
     /* ── Eye Toggle ── */

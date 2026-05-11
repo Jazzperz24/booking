@@ -10,7 +10,7 @@
   --muted: #7b7b8e;
   --radius: 14px;
   --radius-sm: 8px;
-}
+} 
 
 *, *::before, *::after {
   box-sizing: border-box;

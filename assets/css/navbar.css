@@ -1,14 +1,3 @@
-/* ==========================================================
-   FILE: navbar.css
-   COMPONENT: Site-wide Navigation Bar
-   PATH: assets/css/navbar.css
-   DESC: Styles for the sticky top navbar — brand logo,
-         desktop nav links, gold Login button, user dropdown,
-         mobile hamburger menu, and scroll shadow effect.
-   INCLUDE ON: Every page, alongside stylemeow.css
-   ========================================================== */
-
-
 /* ============================================================
    SECTION 1: CSS Variables (Design Tokens)
    — Shared with the rest of the site

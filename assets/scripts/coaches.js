@@ -1,15 +1,3 @@
-/**
- * FILE: coaches.js
- * PAGE: Coach Selection (coaches.php)
- * PATH: assets/scripts/coaches.js
- * DESC: Handles the 2-step coach selection flow —
- *       category selection, coach grid rendering,
- *       multi-select toggle (max 3), and routing to booking
- *
- * DEPENDS ON: jQuery, SweetAlert2, coachData (PHP-injected JSON)
- */
-
-
 /* ============================================================
    SECTION 1: State Variables
    — Track what the user has selected across both steps

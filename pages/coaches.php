@@ -1,8 +1,4 @@
 <?php
-// ============================================================
-// pages/coaches.php — inside /pages/ folder
-// $base = '../'  to reach root-level files
-// ============================================================
 $page = 'coaches';
 $base = '../';
 require '../config/config.php';
@@ -27,11 +23,8 @@ try {
     <link rel="stylesheet" href="/REGISTRATIONSFORM/assets/css/coaches.css">
 </head>
 <body>
-
 <?php require '../includes/navbar.php'; ?>
-
 <div class="page-wrap">
-
     <div class="page-header">
         <div class="tag">&#10022; Find a Coach</div>
         <h1>Choose Your <span>Coach</span></h1>
@@ -39,15 +32,9 @@ try {
     </div>
 
     <div class="steps-bar">
-        <div class="step-item active" id="stepItem1">
-            <div class="step-circle">1</div>
-            <div class="step-label">Category</div>
-        </div>
+        <div class="step-item active" id="stepItem1"><div class="step-circle">1</div><div class="step-label">Category</div></div>
         <div class="step-line" id="stepLine1"></div>
-        <div class="step-item" id="stepItem2">
-            <div class="step-circle">2</div>
-            <div class="step-label">Select Coaches</div>
-        </div>
+        <div class="step-item" id="stepItem2"><div class="step-circle">2</div><div class="step-label">Select Coaches</div></div>
     </div>
 
     <!-- STEP 1: Category -->
@@ -56,11 +43,11 @@ try {
         <div class="categories-grid">
             <?php
             $catMeta = [
-                'Dance'         => ['icon' => '💃',  'label' => 'Dance'],
-                'Fitness'       => ['icon' => '🏋️', 'label' => 'Fitness'],
-                'Sports'        => ['icon' => '⚽',  'label' => 'Sports'],
-                'Wellness/Yoga' => ['icon' => '🧘',  'label' => 'Wellness / Yoga'],
-                'Belle'         => ['icon' => '✨',  'label' => 'Ballet'],
+                'Dance'         => ['icon'=>'💃',  'label'=>'Dance'],
+                'Fitness'       => ['icon'=>'🏋️', 'label'=>'Fitness'],
+                'Sports'        => ['icon'=>'⚽',  'label'=>'Sports'],
+                'Wellness/Yoga' => ['icon'=>'🧘',  'label'=>'Wellness / Yoga'],
+                'Belle'         => ['icon'=>'✨',  'label'=>'Ballet'],
             ];
             foreach ($catMeta as $cat => $meta):
                 $count = isset($coaches[$cat]) ? count($coaches[$cat]) : 0;
@@ -99,7 +86,6 @@ try {
             </button>
         </div>
     </div>
-
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>

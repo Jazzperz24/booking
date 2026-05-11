@@ -1,8 +1,4 @@
 <?php
-// ============================================================
-// pages/loginpage.php — inside /pages/ folder
-// $base = '../'  to reach root-level files
-// ============================================================
 $page = 'login';
 $base = '../';
 require '../config/config.php';

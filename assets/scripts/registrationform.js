@@ -1,11 +1,3 @@
-/**
- * FILE: registrationform.js
- * PATH: assets/scripts/registrationform.js
- * DEPENDS ON: jQuery, SweetAlert2
- * POSTS TO:   ../includes/process.php
- * After success: auto-logged in, redirects to homepage
- */
-
 $(document).ready(function () {
 
     /* ── Eye Toggle ── */

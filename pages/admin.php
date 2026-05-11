@@ -1,14 +1,7 @@
 <?php
-// ============================================================
-// pages/admin.php — inside /pages/ folder
-// $base = '../'  to reach root-level files
-// NOTE: Admin does NOT use navbar.php (it has its own sidebar)
-//       but still needs $base set for any links inside
-// ============================================================
 $page = 'admin';
 $base = '../';
 require '../config/config.php';
-
 
 if (!isset($_SESSION['is_admin']) || !$_SESSION['is_admin']) {
     header('Location: loginpage.php');
@@ -48,12 +41,10 @@ $catStats = $db->query("
     <title>Admin Panel - Kaya Pa?</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Admin has its own sidebar, no navbar.css needed -->
     <link rel="stylesheet" href="/REGISTRATIONSFORM/assets/css/admin.css">
 </head>
 <body>
 
-<!-- Sidebar — links use relative paths within /pages/ -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
         <span>Kaya Pa?</span>
@@ -80,11 +71,10 @@ $catStats = $db->query("
         </div>
     </nav>
     <div class="sidebar-bottom">
-        <!-- Both files are in /pages/ so no ../ needed for these links -->
-        <a href="index.php" onclick="window.location.href='../index.php';return false;">
+        <a href="/REGISTRATIONSFORM/index.php">
             <i class="fa-solid fa-house"></i> View Site
         </a>
-        <a href="loginpage.php?logout=1" style="margin-top:4px">
+        <a href="/REGISTRATIONSFORM/pages/logout.php" style="margin-top:4px">
             <i class="fa-solid fa-right-from-bracket"></i> Logout
         </a>
     </div>
@@ -164,7 +154,7 @@ $catStats = $db->query("
         <div class="tab-panel" id="tab-coaches">
             <div class="form-card">
                 <div class="form-card-title"><i class="fa-solid fa-plus" style="color:var(--gold);margin-right:8px"></i>Add New Coach</div>
-                <form id="addCoachForm">
+                <form id="addCoachForm" enctype="multipart/form-data">
                     <div class="form-row">
                         <div class="form-group"><label>Full Name</label><input type="text" name="name" required placeholder="e.g. Maria Santos"></div>
                         <div class="form-group"><label>Category</label><select name="category" required><option value="">— Select —</option><option value="Dance">Dance</option><option value="Fitness">Fitness</option><option value="Sports">Sports</option><option value="Wellness/Yoga">Wellness/Yoga</option><option value="Belle">Belle</option></select></div>
@@ -174,18 +164,71 @@ $catStats = $db->query("
                         <div class="form-group"><label>Rate (₱/hr)</label><input type="number" name="rate" placeholder="e.g. 800" min="0"></div>
                     </div>
                     <div class="form-group"><label>Bio</label><textarea name="bio" placeholder="Short description..."></textarea></div>
+                    <div class="form-group">
+                        <label>Coach Photo</label>
+                        <input type="file" name="photo" id="coachPhoto" accept="image/*" class="file-input">
+                        <div class="photo-preview-wrap">
+                            <img id="photoPreview" src="" alt="Preview" style="display:none;width:80px;height:80px;object-fit:cover;border-radius:50%;border:2px solid var(--gold);margin-top:10px;">
+                        </div>
+                    </div>
                     <button type="submit" class="btn-gold-sm"><i class="fa-solid fa-plus"></i> Add Coach</button>
                 </form>
             </div>
+
+            <!-- Edit Coach Modal -->
+            <div id="editCoachModal" class="modal-overlay" style="display:none">
+                <div class="modal-box">
+                    <div class="modal-title"><i class="fa-solid fa-pen"></i> Edit Coach</div>
+                    <form id="editCoachForm" enctype="multipart/form-data">
+                        <input type="hidden" name="coach_id" id="edit_coach_id">
+                        <div class="form-row">
+                            <div class="form-group"><label>Full Name</label><input type="text" name="name" id="edit_coach_name" required></div>
+                            <div class="form-group"><label>Category</label><select name="category" id="edit_coach_category" required><option value="">— Select —</option><option value="Dance">Dance</option><option value="Fitness">Fitness</option><option value="Sports">Sports</option><option value="Wellness/Yoga">Wellness/Yoga</option><option value="Belle">Belle</option></select></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Specialty</label><input type="text" name="specialty" id="edit_coach_specialty"></div>
+                            <div class="form-group"><label>Rate (₱/hr)</label><input type="number" name="rate" id="edit_coach_rate" min="0"></div>
+                        </div>
+                        <div class="form-group"><label>Bio</label><textarea name="bio" id="edit_coach_bio"></textarea></div>
+                        <div class="form-group">
+                            <label>Update Photo (optional)</label>
+                            <input type="file" name="photo" accept="image/*" class="file-input">
+                            <div id="edit_coach_current_photo" style="margin-top:8px"></div>
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:16px">
+                            <button type="submit" class="btn-gold-sm"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                            <button type="button" class="btn-sm btn-cancel" onclick="closeModal('editCoachModal')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="table-card">
                 <div class="table-header"><div class="table-title">All Coaches (<?= count($allCoaches) ?>)</div><input type="text" class="search-box" placeholder="Search coaches..." oninput="filterTable(this,'coachesTable')"></div>
                 <table id="coachesTable">
-                    <thead><tr><th>#</th><th>Name</th><th>Category</th><th>Specialty</th><th>Rate/hr</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>Photo</th><th>#</th><th>Name</th><th>Category</th><th>Specialty</th><th>Rate/hr</th><th>Actions</th></tr></thead>
                     <tbody>
                     <?php foreach ($allCoaches as $coach): ?>
-                        <tr id="crow_<?= $coach['id'] ?>"><td><?= $coach['id'] ?></td><td><?= htmlspecialchars($coach['name']) ?></td><td><?= htmlspecialchars($coach['category']) ?></td><td><?= htmlspecialchars($coach['specialty'] ?? '—') ?></td><td>₱<?= number_format($coach['rate'] ?? 0) ?></td><td><button class="btn-sm btn-delete" onclick="deleteCoach(<?= $coach['id'] ?>)"><i class="fa-solid fa-trash"></i> Delete</button></td></tr>
+                        <tr id="crow_<?= $coach['id'] ?>">
+                            <td>
+                                <?php if (!empty($coach['photo']) && file_exists('../assets/images/coaches/' . $coach['photo'])): ?>
+                                    <img src="/REGISTRATIONSFORM/assets/images/coaches/<?= htmlspecialchars($coach['photo']) ?>" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)">
+                                <?php else: ?>
+                                    <div style="width:40px;height:40px;border-radius:50%;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--border)">👤</div>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= $coach['id'] ?></td>
+                            <td><?= htmlspecialchars($coach['name']) ?></td>
+                            <td><?= htmlspecialchars($coach['category']) ?></td>
+                            <td><?= htmlspecialchars($coach['specialty'] ?? '—') ?></td>
+                            <td>₱<?= number_format($coach['rate'] ?? 0) ?></td>
+                            <td style="display:flex;gap:6px;flex-wrap:wrap">
+                                <button class="btn-sm btn-edit" onclick="openEditCoach(<?= $coach['id'] ?>, '<?= addslashes($coach['name']) ?>', '<?= addslashes($coach['category']) ?>', '<?= addslashes($coach['specialty'] ?? '') ?>', <?= $coach['rate'] ?? 0 ?>, '<?= addslashes($coach['bio'] ?? '') ?>', '<?= addslashes($coach['photo'] ?? '') ?>')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                <button class="btn-sm btn-delete" onclick="deleteCoach(<?= $coach['id'] ?>)"><i class="fa-solid fa-trash"></i> Delete</button>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
-                    <?php if (empty($allCoaches)): ?><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px">No coaches yet.</td></tr><?php endif; ?>
+                    <?php if (empty($allCoaches)): ?><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No coaches yet.</td></tr><?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -193,13 +236,45 @@ $catStats = $db->query("
 
         <!-- CLIENTS TAB -->
         <div class="tab-panel" id="tab-clients">
+
+            <!-- Edit Client Modal -->
+            <div id="editClientModal" class="modal-overlay" style="display:none">
+                <div class="modal-box">
+                    <div class="modal-title"><i class="fa-solid fa-user-pen"></i> Edit Client</div>
+                    <form id="editClientForm">
+                        <input type="hidden" name="client_id" id="edit_client_id">
+                        <div class="form-row">
+                            <div class="form-group"><label>First Name</label><input type="text" name="firstname" id="edit_client_firstname" required></div>
+                            <div class="form-group"><label>Last Name</label><input type="text" name="lastname" id="edit_client_lastname" required></div>
+                        </div>
+                        <div class="form-group"><label>Email</label><input type="email" name="email" id="edit_client_email" required></div>
+                        <div class="form-group"><label>Phone</label><input type="text" name="phone" id="edit_client_phone" maxlength="11"></div>
+                        <div style="display:flex;gap:10px;margin-top:16px">
+                            <button type="submit" class="btn-gold-sm"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+                            <button type="button" class="btn-sm btn-cancel" onclick="closeModal('editClientModal')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="table-card">
                 <div class="table-header"><div class="table-title">Registered Clients (<?= count($allClients) ?>)</div><input type="text" class="search-box" placeholder="Search clients..." oninput="filterTable(this,'clientsTable')"></div>
                 <table id="clientsTable">
                     <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Bookings</th><th>Joined</th><th>Actions</th></tr></thead>
                     <tbody>
                     <?php foreach ($allClients as $cl): ?>
-                        <tr id="clrow_<?= $cl['id'] ?>"><td><?= $cl['id'] ?></td><td><?= htmlspecialchars($cl['firstname'].' '.$cl['lastname']) ?></td><td><?= htmlspecialchars($cl['email']) ?></td><td><?= htmlspecialchars($cl['phonenumber'] ?? '—') ?></td><td><span class="badge badge-confirmed"><?= $cl['booking_count'] ?></span></td><td><?= date('M d, Y', strtotime($cl['created_at'] ?? 'now')) ?></td><td><button class="btn-sm btn-delete" onclick="deleteClient(<?= $cl['id'] ?>)"><i class="fa-solid fa-trash"></i> Remove</button></td></tr>
+                        <tr id="clrow_<?= $cl['id'] ?>">
+                            <td><?= $cl['id'] ?></td>
+                            <td><?= htmlspecialchars($cl['firstname'].' '.$cl['lastname']) ?></td>
+                            <td><?= htmlspecialchars($cl['email']) ?></td>
+                            <td><?= htmlspecialchars($cl['phonenumber'] ?? '—') ?></td>
+                            <td><span class="badge badge-confirmed"><?= $cl['booking_count'] ?></span></td>
+                            <td><?= date('M d, Y', strtotime($cl['created_at'] ?? 'now')) ?></td>
+                            <td style="display:flex;gap:6px;flex-wrap:wrap">
+                                <button class="btn-sm btn-edit" onclick="openEditClient(<?= $cl['id'] ?>, '<?= addslashes($cl['firstname']) ?>', '<?= addslashes($cl['lastname']) ?>', '<?= addslashes($cl['email']) ?>', '<?= addslashes($cl['phonenumber'] ?? '') ?>')"><i class="fa-solid fa-pen"></i> Edit</button>
+                                <button class="btn-sm btn-delete" onclick="deleteClient(<?= $cl['id'] ?>)"><i class="fa-solid fa-trash"></i> Remove</button>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                     <?php if (empty($allClients)): ?><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">No clients yet.</td></tr><?php endif; ?>
                     </tbody>
@@ -242,7 +317,6 @@ $catStats = $db->query("
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Admin uses its own JS, NOT navbar.js (no navbar on admin) -->
 <script src="/REGISTRATIONSFORM/assets/scripts/admin.js"></script>
 </body>
 </html>
