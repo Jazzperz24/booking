@@ -1,13 +1,13 @@
 <?php
+
 $page = 'login';
 $base = '../';
 require '../config/config.php';
 
-// Handle logout
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
-    header('Location: ../homepage.php');
+    header('Location: ../index.php');
     exit();
 }
 ?>
@@ -39,13 +39,25 @@ if (isset($_GET['logout'])) {
 
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                <input type="email" id="email" name="email"
+                       placeholder="you@example.com" required>
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password" style="display:flex;justify-content:space-between;align-items:center">
+                    <span>Password</span>
+                    
+                    <a href="forgotpassword.php"
+                       style="font-size:11px;color:var(--muted);text-decoration:none;
+                              font-weight:500;letter-spacing:.3px;transition:color .2s"
+                       onmouseover="this.style.color='var(--gold)'"
+                       onmouseout="this.style.color='var(--muted)'">
+                        <i class="fa-solid fa-key" style="margin-right:3px"></i>Forgot password?
+                    </a>
+                </label>
                 <div class="input-icon-wrap">
-                    <input type="password" id="password" name="password" placeholder="Your password" required>
+                    <input type="password" id="password" name="password"
+                           placeholder="Your password" required>
                     <i class="fa-solid fa-eye toggle-eye"></i>
                 </div>
             </div>

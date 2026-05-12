@@ -1,4 +1,14 @@
-<?php require '../config/config.php';
+<?php
+
+// ── PHPMailer autoload ──
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/../vendor/PHPMailer/src/Exception.php';
+require_once __DIR__ . '/../vendor/PHPMailer/src/PHPMailer.php';
+require_once __DIR__ . '/../vendor/PHPMailer/src/SMTP.php';
+
+require '../config/config.php';
 
 /* ── SECTION 1: REGISTRATION ── */
 if (isset($_POST['create'])) {
@@ -133,7 +143,6 @@ if (isset($_POST['update_profile'])) {
     if (!preg_match('/^09[0-9]{9}$/', $phone))         { echo 'Phone must start with 09 and be 11 digits.'; exit(); }
     if (empty($email))                                  { echo 'Email is required.'; exit(); }
 
-    // Check if email is taken by another account
     $check = $db->prepare('SELECT id FROM clients WHERE email = ? AND id != ?');
     $check->execute([$email, $client_id]);
     if ($check->fetch()) { echo 'This email is already used by another account.'; exit(); }
@@ -141,12 +150,9 @@ if (isset($_POST['update_profile'])) {
     try {
         $stmt = $db->prepare("UPDATE clients SET firstname=?, lastname=?, email=?, phonenumber=? WHERE id=?");
         $stmt->execute([$firstname, $lastname, $email, $phone, $client_id]);
-
-        // Update session so navbar shows new name immediately
         $_SESSION['firstname'] = $firstname;
         $_SESSION['lastname']  = $lastname;
         $_SESSION['email']     = $email;
-
         echo 'success';
     } catch (PDOException $e) {
         echo 'Update failed. Please try again.';
@@ -158,16 +164,15 @@ if (isset($_POST['update_profile'])) {
 if (isset($_POST['change_password'])) {
     if (!isset($_SESSION['client_id'])) { echo 'Not logged in.'; exit(); }
 
-    $client_id       = $_SESSION['client_id'];
+    $client_id        = $_SESSION['client_id'];
     $current_password = $_POST['current_password'] ?? '';
-    $new_password     = $_POST['new_password']     ?? '';
+    $new_password     = $_POST['new_password']      ?? '';
     $confirm_new      = $_POST['confirm_new_password'] ?? '';
 
     if (empty($current_password) || empty($new_password)) { echo 'All fields are required.'; exit(); }
     if ($new_password !== $confirm_new) { echo 'New passwords do not match.'; exit(); }
     if (strlen($new_password) < 6) { echo 'New password must be at least 6 characters.'; exit(); }
 
-    // Get current password hash from DB
     $stmt = $db->prepare("SELECT password FROM clients WHERE id = ?");
     $stmt->execute([$client_id]);
     $row = $stmt->fetch();
@@ -186,72 +191,183 @@ if (isset($_POST['change_password'])) {
     exit();
 }
 
-/* ── Update Profile ── */
-if (isset($_POST['update_profile'])) {
-    if (!isset($_SESSION['client_id'])) { echo 'Not logged in.'; exit(); }
+/* ════════════════════════════════════════════════════════════
+   SECTION 8: FORGOT PASSWORD
+   — Validates email, generates token, stores it in DB,
+     then sends a reset link via PHPMailer (Gmail SMTP).
+   ════════════════════════════════════════════════════════════ */
+if (isset($_POST['forgot_password'])) {
 
-    $id        = $_SESSION['client_id'];
-    $firstname = trim($_POST['firstname'] ?? '');
-    $lastname  = trim($_POST['lastname']  ?? '');
-    $email     = trim($_POST['email']     ?? '');
-    $phone     = trim($_POST['phone']     ?? '');
+    $email = trim($_POST['email'] ?? '');
 
-    if (!preg_match('/^[A-Z][a-zA-Z]*$/', $firstname)) { echo 'First name must start with a capital letter.'; exit(); }
-    if (!preg_match('/^[A-Z][a-zA-Z]*$/', $lastname))  { echo 'Last name must start with a capital letter.'; exit(); }
-    if (!empty($phone) && !preg_match('/^09[0-9]{9}$/', $phone)) { echo 'Phone must start with 09 and be 11 digits.'; exit(); }
+    if (empty($email)) {
+        echo 'Please enter your email address.';
+        exit();
+    }
 
-    // Check email not taken by another user
-    $check = $db->prepare("SELECT id FROM clients WHERE email = ? AND id != ?");
-    $check->execute([$email, $id]);
-    if ($check->fetch()) { echo 'This email is already used by another account.'; exit(); }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo 'Please enter a valid email address.';
+        exit();
+    }
+
+    // Check if email exists in the database
+    $stmt = $db->prepare("SELECT * FROM clients WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    // Security: always say "success" even if email not found
+    // (prevents attackers from knowing which emails are registered)
+    if (!$user) {
+        echo 'success'; // Silent fail — don't reveal if email exists
+        exit();
+    }
+
+    // Generate a secure unique token
+    $token = bin2hex(random_bytes(32));
+
+    // Store expiry using PHP time (avoids MySQL timezone mismatch)
+    $expire = date('Y-m-d H:i:s', time() + 3600); // 1 hour from now
+
+    // Save token + expiry to the database
+    $update = $db->prepare("UPDATE clients SET reset_token = ?, reset_expire = ? WHERE email = ?");
+    $update->execute([$token, $expire, $email]);
+
+    // Build the reset link
+    $resetLink = "http://localhost/REGISTRATIONSFORM/pages/resetpassword.php?token=" . $token;
+
+    // ── Send email via PHPMailer ──
+    $mail = new PHPMailer(true);
 
     try {
-        $stmt = $db->prepare("UPDATE clients SET firstname=?, lastname=?, email=?, phonenumber=? WHERE id=?");
-        $stmt->execute([$firstname, $lastname, $email, $phone, $id]);
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
 
-        // Update session with new name
-        $_SESSION['firstname'] = $firstname;
-        $_SESSION['lastname']  = $lastname;
-        $_SESSION['email']     = $email;
+    
+        $mail->Username   = 'garzjazz22@gmail.com';
+    
+        $mail->Password   = 'myzhkbbhewlnrjtm';
 
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        
+        $mail->addAddress($email); // sends to whoever requested the reset
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Reset Your Kaya Pa? Password';
+        $mail->Body    = "
+            <div style='font-family:Arial,sans-serif;max-width:500px;margin:0 auto;
+                        padding:32px;background:#0e0e12;color:#f4f0e8;border-radius:12px;
+                        border:1px solid rgba(212,168,83,0.2)'>
+
+                <h2 style='color:#d4a853;margin-top:0'>
+                    🔑 Kaya Pa? — Password Reset
+                </h2>
+
+                <p style='color:#b0aead;line-height:1.7'>
+                    Hi <strong style='color:#f4f0e8'>" . htmlspecialchars($user['firstname']) . "</strong>,<br>
+                    We received a request to reset your password.
+                    Click the button below to set a new one.
+                    This link will expire in <strong style='color:#d4a853'>1 hour</strong>.
+                </p>
+
+                <a href='$resetLink'
+                   style='display:inline-block;margin:20px 0;padding:13px 28px;
+                          background:linear-gradient(135deg,#d4a853,#f0c97a);
+                          color:#0e0e12;text-decoration:none;border-radius:9px;
+                          font-weight:700;font-size:15px;'>
+                    Reset My Password
+                </a>
+
+                <p style='color:#7b7b8e;font-size:12px;margin-top:24px;
+                           border-top:1px solid rgba(212,168,83,0.15);padding-top:16px'>
+                    If you didn't request this, you can safely ignore this email.<br>
+                    Your password will not change unless you click the link above.
+                </p>
+
+                <p style='color:#7b7b8e;font-size:11px;margin-top:8px'>
+                    Or copy this link into your browser:<br>
+                    <span style='color:#d4a853;word-break:break-all'>$resetLink</span>
+                </p>
+            </div>
+        ";
+
+        // Plain text fallback for email clients that don't render HTML
+        $mail->AltBody = "Kaya Pa? Password Reset\n\nHi " . $user['firstname'] . ",\n\nClick this link to reset your password (expires in 1 hour):\n\n$resetLink\n\nIf you didn't request this, ignore this email.";
+
+        $mail->send();
         echo 'success';
-    } catch (PDOException $e) {
-        echo 'Profile update failed. Please try again.';
+
+    } catch (Exception $e) {
+        // Log the real error server-side, show generic message to user
+        error_log('PHPMailer Error: ' . $mail->ErrorInfo);
+        echo 'Failed to send email. Please try again later.';
     }
+
     exit();
 }
 
-/* ── Change Password ── */
-if (isset($_POST['change_password'])) {
-    if (!isset($_SESSION['client_id'])) { echo 'Not logged in.'; exit(); }
+/* ════════════════════════════════════════════════════════════
+   SECTION 9: RESET PASSWORD
+   — Validates token using PHP time (no MySQL timezone issue),
+     hashes new password, clears the token from DB.
+   ════════════════════════════════════════════════════════════ */
+if (isset($_POST['reset_password'])) {
 
-    $id           = $_SESSION['client_id'];
-    $current_pw   = $_POST['current_password']   ?? '';
-    $new_pw       = $_POST['new_password']        ?? '';
-    $confirm_pw   = $_POST['confirm_new_password'] ?? '';
+    $token   = trim($_POST['token']            ?? '');
+    $pw      = $_POST['password']              ?? '';
+    $confirm = $_POST['confirm_password']      ?? '';
 
-    if (empty($current_pw) || empty($new_pw) || empty($confirm_pw)) {
-        echo 'Please fill in all password fields.'; exit();
+    if (empty($token)) {
+        echo 'Invalid reset link.';
+        exit();
     }
 
-    if ($new_pw !== $confirm_pw) { echo 'New passwords do not match.'; exit(); }
-    if (strlen($new_pw) < 6)     { echo 'New password must be at least 6 characters.'; exit(); }
-
-    // Get current password hash
-    $stmt = $db->prepare("SELECT password FROM clients WHERE id = ?");
-    $stmt->execute([$id]);
-    $row = $stmt->fetch();
-
-    if (!$row || !password_verify($current_pw, $row['password'])) {
-        echo 'Current password is incorrect.'; exit();
+    if (empty($pw) || empty($confirm)) {
+        echo 'Please fill in all fields.';
+        exit();
     }
 
-    try {
-        $hashed = password_hash($new_pw, PASSWORD_DEFAULT);
-        $db->prepare("UPDATE clients SET password = ? WHERE id = ?")->execute([$hashed, $id]);
-        echo 'success';
-    } catch (PDOException $e) {
-        echo 'Password update failed. Please try again.';
+    if ($pw !== $confirm) {
+        echo 'Passwords do not match.';
+        exit();
     }
+
+    if (strlen($pw) < 6) {
+        echo 'Password must be at least 6 characters.';
+        exit();
+    }
+
+    // Use PHP time for comparison — avoids MySQL NOW() timezone mismatch
+    $currentTime = date('Y-m-d H:i:s');
+
+    $stmt = $db->prepare("
+        SELECT * FROM clients
+        WHERE reset_token = ?
+        AND reset_expire > ?
+    ");
+    $stmt->execute([$token, $currentTime]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        echo 'Invalid or expired reset link. Please request a new one.';
+        exit();
+    }
+
+    // Hash the new password
+    $hashed = password_hash($pw, PASSWORD_DEFAULT);
+
+    // Update password and clear the token so it can't be reused
+    $update = $db->prepare("
+        UPDATE clients
+        SET password     = ?,
+            reset_token  = NULL,
+            reset_expire = NULL
+        WHERE id = ?
+    ");
+    $update->execute([$hashed, $user['id']]);
+
+    echo 'success';
     exit();
 }
